@@ -1,5 +1,6 @@
 #!/bin/bash
 
+### Evaluate Environment Variables ###
 MONGODB_HOST=${MONGODB_PORT_27017_TCP_ADDR:-${MONGODB_HOST}}
 MONGODB_HOST=${MONGODB_PORT_1_27017_TCP_ADDR:-${MONGODB_HOST}}
 MONGODB_PORT=${MONGODB_PORT_27017_TCP_PORT:-${MONGODB_PORT}}
@@ -15,6 +16,7 @@ MONGODB_PASS=${MONGODB_PASS:-${MONGODB_ENV_MONGODB_PASS}}
 
 BACKUP_CMD="mongodump --out /backup/"'${BACKUP_NAME}'" --host ${MONGODB_HOST} --port ${MONGODB_PORT} ${USER_STR}${PASS_STR}${DB_STR} ${EXTRA_OPTS}"
 
+### Create Backup Script ###
 echo "=> Creating backup script"
 rm -f /backup.sh
 cat <<EOF >> /backup.sh
@@ -42,6 +44,7 @@ echo "=> Backup done"
 EOF
 chmod +x /backup.sh
 
+### Create Restore Script ###
 echo "=> Creating restore script"
 rm -f /restore.sh
 cat <<EOF >> /restore.sh
@@ -56,6 +59,7 @@ echo "=> Done"
 EOF
 chmod +x /restore.sh
 
+### Log File ###
 touch /mongo_backup.log
 tail -F /mongo_backup.log &
 
@@ -72,6 +76,7 @@ if [ -n "${INIT_BACKUP}" ]; then
     /backup.sh
 fi
 
+### Configure Cron Job ###
 echo "${CRON_TIME} /backup.sh >> /mongo_backup.log 2>&1" > /crontab.conf
 crontab  /crontab.conf
 echo "=> Running cron job"
